@@ -3,25 +3,18 @@ import { ReservationData } from "/Users/takehiromizuno/Documents/drive-me-202312
 const ScheduleBar = class extends HTMLDivElement {
     private reservationData: ReservationData;
 
-    constructor(args: { reservationData: ReservationData, totalMsOfSchedule: number, previousMonthStart: Date, previousScheduleBarWidth: string, color: string }) {
+    constructor(args: { reservationData: ReservationData, startMs: number, totalMsOfSchedule: number, previousScheduleBarWidth: string, color: string }) {
         super();
 
-        const { reservationData, totalMsOfSchedule, previousMonthStart, previousScheduleBarWidth, color } = args;
+        const { reservationData, startMs, totalMsOfSchedule, previousScheduleBarWidth, color } = args;
         this.reservationData = reservationData;
-
-        // this.setAttribute("data-bs-toggle", "popover");
-        // this.setAttribute
-
-        // Object.assign(this.setAttribute, {
-        //     "data-bs-toggle": "popover"
-        // });
 
         const departureDatetime: Date = new Date(reservationData.departureDatetime);
         const returnDatetime: Date = new Date(reservationData.returnDatetime);
 
         const diffInTime: number = returnDatetime.getTime() - departureDatetime.getTime();
         const relativeWidth = `${(diffInTime / totalMsOfSchedule) * 100}%`;
-        const diffFromStart = `${((departureDatetime.getTime() - previousMonthStart.getTime()) / totalMsOfSchedule) * 100}%`;
+        const diffFromStart = `${((departureDatetime.getTime() - startMs) / totalMsOfSchedule) * 100}%`;
 
         this.className = "card";
 

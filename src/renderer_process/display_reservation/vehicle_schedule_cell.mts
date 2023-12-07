@@ -3,10 +3,10 @@ import { VehicleAttributes, VehicleScheduleCell } from "/Users/takehiromizuno/Do
 const VehicleScheduleCell = class extends HTMLDivElement {
     static vehicleScheduleCells: VehicleScheduleCell[] = [];
 
-    constructor(args: { vehicleAttributes: VehicleAttributes, vehicleCalendarWidth: string }) {
+    constructor(args: { vehicleAttributes: VehicleAttributes, vehicleCalendarWidth: string, date: Date }) {
         super();
 
-        const { vehicleAttributes, vehicleCalendarWidth } = args;
+        const { vehicleAttributes, vehicleCalendarWidth, date } = args;
 
         Object.assign(this.style, {
             display: "flex",
@@ -25,6 +25,7 @@ const VehicleScheduleCell = class extends HTMLDivElement {
 
         const newVehicleScheduleCell: VehicleScheduleCell = {
             vehicleId: vehicleAttributes.id,
+            monthIndex: date.getMonth(),
             vehicleScheduleCell: this,
             reservationScheduleDiv: reservationScheduleDiv,
             maintenanceScheduleDiv: maintenanceScheduleDiv

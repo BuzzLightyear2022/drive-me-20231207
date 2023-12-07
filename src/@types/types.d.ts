@@ -64,6 +64,7 @@ export type MonthCalendar = {
 
 export type VehicleScheduleCell = {
     vehicleId: string | undefined
+    monthIndex: number | undefined
     vehicleScheduleCell: HTMLDivElement | undefined
     reservationScheduleDiv: HTMLDivElement | undefined
     maintenanceScheduleDiv: HTMLDivElement | undefined

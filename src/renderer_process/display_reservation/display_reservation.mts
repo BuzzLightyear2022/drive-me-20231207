@@ -31,15 +31,8 @@ const totalDays: number = previousMonthDays + currentMonthDays + nextMonthDays;
 // retrieve ms of total days.
 const previousMonthStart: Date = new Date(currentDate.getFullYear(), currentDate.getMonth() - 1, 1, 0, 0, 0, 0);
 const nextMonthEnd: Date = new Date(currentDate.getFullYear(), currentDate.getMonth() + 2, 0, 23, 59, 59, 999);
-const totalMsOfSchedule: number = nextMonthEnd.getTime() - previousMonthStart.getTime();
 
 headerDiv.append(currentMonthDiv);
-
-// Retrieve the width of each calendar and the overall total width of the calendars.
-// const previousCalendarWidth: number = previousMonthCalendar.offsetWidth;
-// const currentCalendarWidth: number = currentMonthCalendar.offsetWidth;
-// const nextCalendarWidth: number = nextMonthCalendar.offsetWidth;
-// const totalCalendarWidth: number = previousCalendarWidth + currentCalendarWidth + nextCalendarWidth;
 
 const getTotalCalendarWidth = (): number => {
     const monthCalendars = calendarContainer.children;
@@ -135,45 +128,10 @@ const handleVehicleAttributesItemScroll = (): void => {
     scrollHandler();
     calendarContainer.addEventListener("scroll", scrollHandler, false);
 
-    // const PreviousMonthCalendar: MonthCalendar = new MonthCalendar({ date: previousMonthDate }).getCalendarInfo();
-    // const NextMonthCalendar: MonthCalendar = new MonthCalendar({ date: nextMonthDate }).getCalendarInfo();
-
-    // calendarContainer.append(currentMonthCalendar);
-
-
     vehicleAttributesArray.forEach((vehicleAttributes: VehicleAttributes): void => {
         const vehicleAttributesItem = new VehicleAttributesItem({ vehicleAttributes: vehicleAttributes });
         vehicleAttributesItemContainer.append(vehicleAttributesItem);
-        // const vehicleScheduleCell = VehicleScheduleCell.create({ vehicleAttributes: vehicleAttributes, monthCalendarWidth: `${totalCalendarWidth}px`, daysOfMonth: totalDays });
-        // const vehicleScheduleCellElement: HTMLDivElement = vehicleScheduleCell.vehicleScheduleCell as HTMLDivElement;
-        // vehicleScheduleCellElement.style.width = `${totalCalendarWidth}px`;
-
-
-        // vehicleScheduleContainer.append(vehicleScheduleCellElement);
     });
-
-    // // Render vehicle schedules.
-    // const reservationData: ReservationData[] = await window.sqlSelect.reservationData({ startDate: previousMonthStart, endDate: nextMonthEnd });
-
-    // // Render reservation data.
-    // reservationData.forEach((reservationData: ReservationData) => {
-    //     vehicleScheduleCells.forEach((vehicleScheduleCell: VehicleScheduleCell) => {
-    //         const reservationDisplayDiv: HTMLDivElement = vehicleScheduleCell.reservationScheduleDiv as HTMLDivElement;
-    //         if (reservationData.vehicleId === vehicleScheduleCell.vehicleId) {
-    //             const previousScheduleBar: HTMLDivElement | undefined = reservationDisplayDiv.lastElementChild as HTMLDivElement;
-    //             const previousScheduleBarWidth: number = previousScheduleBar ? previousScheduleBar.getBoundingClientRect().width : 0;
-
-    //             const scheduleBar: HTMLDivElement = new ScheduleBar({
-    //                 reservationData: reservationData,
-    //                 totalMsOfSchedule: totalMsOfSchedule,
-    //                 previousMonthStart: previousMonthStart,
-    //                 previousScheduleBarWidth: `${previousScheduleBarWidth}px`,
-    //                 color: "green"
-    //             });
-    //             reservationDisplayDiv.append(scheduleBar);
-    //         }
-    //     });
-    // });
 
     vehicleAttributesItemContainer.addEventListener("scroll", handleVehicleScheduleScrollY);
     vehicleScheduleContainer.addEventListener("scroll", handleVehicleAttributesItemScroll);

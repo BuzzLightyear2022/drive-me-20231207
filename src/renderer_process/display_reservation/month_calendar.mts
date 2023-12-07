@@ -1,6 +1,7 @@
-import { VehicleAttributes, CalendarInfo } from "/Users/takehiromizuno/Documents/drive-me-20231202/drive-me/src/@types/types.d";
+import { VehicleAttributes, CalendarInfo, ReservationData } from "/Users/takehiromizuno/Documents/drive-me-20231202/drive-me/src/@types/types.d";
 import { getMonthName } from "/Users/takehiromizuno/Documents/drive-me-20231202/drive-me/src/renderer_process/common_modules.mjs";
 import { VehicleScheduleCell } from "/Users/takehiromizuno/Documents/drive-me-20231202/drive-me/src/renderer_process/display_reservation/vehicle_schedule_cell.mjs";
+import { ScheduleBar } from "/Users/takehiromizuno/Documents/drive-me-20231202/drive-me/src/renderer_process/display_reservation/schedule_bar.mjs";
 
 const MonthCalendar = class {
     private calendarInfo: CalendarInfo = {
@@ -27,7 +28,8 @@ const MonthCalendar = class {
         vehicleAttributesArray.forEach((vehicleAttributes: VehicleAttributes) => {
             const vehicleScheduleCell: HTMLDivElement = new VehicleScheduleCell({
                 vehicleAttributes: vehicleAttributes,
-                vehicleCalendarWidth: `${daysContainerWidth}px`
+                vehicleCalendarWidth: `${daysContainerWidth}px`,
+                date: date
             });
             innerVehicleScheduleContainer.append(vehicleScheduleCell);
         });
@@ -36,6 +38,36 @@ const MonthCalendar = class {
 
         this.calendarInfo.year = date.getFullYear();
         this.calendarInfo.monthIndex = date.getMonth();
+
+        (async () => {
+            const start: Date = new Date(date.getFullYear(), date.getMonth(), 1, 0, 0, 0, 0);
+            const end: Date = new Date(date.getFullYear(), date.getMonth() + 1, 0, 23, 59, 59, 999);
+            const totalMsOfMonth: number = end.getTime() - start.getTime();
+
+            const reservationData: ReservationData[] = await window.sqlSelect.reservationData({ startDate: start, endDate: end });
+            const vehicleScheduleCells = VehicleScheduleCell.vehicleScheduleCells;
+            console.log(vehicleScheduleCells);
+
+            reservationData.forEach((reservationData: ReservationData) => {
+                vehicleScheduleCells.forEach((vehicleScheduleCell: VehicleScheduleCell) => {
+                    const reservationDisplayDiv: HTMLDivElement = vehicleScheduleCell.reservationScheduleDiv as HTMLDivElement;
+                    const departureMonthIndex: number = new Date(reservationData.departureDatetime).getMonth();
+                    if (reservationData.vehicleId === vehicleScheduleCell.vehicleId && departureMonthIndex === vehicleScheduleCell.monthIndex) {
+                        const previousScheduleBar: HTMLDivElement | undefined = reservationDisplayDiv.lastElementChild as HTMLDivElement;
+                        const previousScheduleBarWidth: number = previousScheduleBar ? previousScheduleBar.getBoundingClientRect().width : 0;
+
+                        const scheduleBar: HTMLDivElement = new ScheduleBar({
+                            reservationData: reservationData,
+                            startMs: start.getTime(),
+                            totalMsOfSchedule: totalMsOfMonth,
+                            previousScheduleBarWidth: `${previousScheduleBarWidth}px`,
+                            color: "green"
+                        });
+                        reservationDisplayDiv.append(scheduleBar);
+                    }
+                });
+            });
+        })();
     }
 
     private daysContainer(args: { date: Date }): HTMLDivElement {
