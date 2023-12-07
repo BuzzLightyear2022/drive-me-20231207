@@ -3,43 +3,29 @@ import { VehicleAttributes, VehicleScheduleCell } from "/Users/takehiromizuno/Do
 const VehicleScheduleCell = class extends HTMLDivElement {
     static vehicleScheduleCells: VehicleScheduleCell[] = [];
 
-    constructor (args: { vehicleAttributes: VehicleAttributes, monthCalendarWidth: string, daysOfMonth: number }) {
+    constructor(args: { vehicleAttributes: VehicleAttributes, vehicleCalendarWidth: string }) {
         super();
 
-        const { vehicleAttributes, monthCalendarWidth, daysOfMonth } = args;
+        const { vehicleAttributes, vehicleCalendarWidth } = args;
 
-        const vehicleScheduleCell: HTMLDivElement = document.createElement("div");
-        Object.assign(vehicleScheduleCell.style, {
+        Object.assign(this.style, {
             display: "flex",
+            flexDirection: "column",
             whiteSpace: "nowrap",
-            border: "solid",
-            overflow: "hidden",
-            width: monthCalendarWidth,
-            height: "130px",
+            overflow: "visible",
+            minHeight: "130px",
+            width: vehicleCalendarWidth,
+            border: "solid"
         });
 
-        const reservationScheduleDiv: HTMLDivElement = document.createElement("div");
-        Object.assign(reservationScheduleDiv.style, {
-            display: "flex",
-            height: "50%",
-        });
+        const reservationScheduleDiv: HTMLDivElement = this.reservationScheduleDiv();
+        const maintenanceScheduleDiv: HTMLDivElement = this.maintenanceScheduleDiv();
 
-        for (let i = 1; i <= daysOfMonth; i++) {
-            const dayCell = this.dayCell({ monthCalendarWidth: monthCalendarWidth, daysOfMonth: daysOfMonth });
-            // reservationScheduleDiv.append(dayCell);
-        }
-
-        const maintenanceScheduleDiv: HTMLDivElement = document.createElement("div");
-        Object.assign(maintenanceScheduleDiv.style, {
-            display: "flex",
-            height: "50%"
-        });
-
-        vehicleScheduleCell.append(reservationScheduleDiv, maintenanceScheduleDiv);
+        this.append(reservationScheduleDiv, maintenanceScheduleDiv);
 
         const newVehicleScheduleCell: VehicleScheduleCell = {
             vehicleId: vehicleAttributes.id,
-            vehicleScheduleCell: vehicleScheduleCell,
+            vehicleScheduleCell: this,
             reservationScheduleDiv: reservationScheduleDiv,
             maintenanceScheduleDiv: maintenanceScheduleDiv
         }
@@ -47,18 +33,27 @@ const VehicleScheduleCell = class extends HTMLDivElement {
         VehicleScheduleCell.vehicleScheduleCells.push(newVehicleScheduleCell);
     }
 
-    private dayCell = (args: { monthCalendarWidth: string, daysOfMonth: number }) => {
-        const { monthCalendarWidth, daysOfMonth } = args;
-        const dayCell: HTMLDivElement = document.createElement("div");
-        Object.assign(dayCell.style, {
+    private reservationScheduleDiv = (): HTMLDivElement => {
+        const reservationScheduleDiv: HTMLDivElement = document.createElement("div");
+        Object.assign(reservationScheduleDiv.style, {
             display: "flex",
-            position: "relative",
-            width: `calc(${monthCalendarWidth} / ${daysOfMonth})`,
-            height: "100%",
-            border: "solid"
+            flexDirection: "row",
+            height: "50%",
         });
-        return dayCell;
+        return reservationScheduleDiv;
+    }
+
+    private maintenanceScheduleDiv = (): HTMLDivElement => {
+        const maintenanceScheduleDiv: HTMLDivElement = document.createElement("div");
+        Object.assign(maintenanceScheduleDiv.style, {
+            display: "flex",
+            flexDirection: "row",
+            height: "50%"
+        });
+        return maintenanceScheduleDiv;
     }
 }
+
+customElements.define("vehicle-schedule-cell", VehicleScheduleCell, { extends: "div" });
 
 export { VehicleScheduleCell }

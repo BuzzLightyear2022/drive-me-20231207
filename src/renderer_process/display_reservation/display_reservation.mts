@@ -1,15 +1,12 @@
 import { VehicleAttributesItem } from "/Users/takehiromizuno/Documents/drive-me-20231202/drive-me/src/renderer_process/display_reservation/vehicle_attributes_item.mjs";
 import { MonthCalendar } from "/Users/takehiromizuno/Documents/drive-me-20231202/drive-me/src/renderer_process/display_reservation/month_calendar.mjs";
-import { VehicleScheduleCell } from "/Users/takehiromizuno/Documents/drive-me-20231202/drive-me/src/renderer_process/display_reservation/vehicle_schedule_cell.mjs";
-import { VehicleAttributes, ReservationData, Calendars } from "/Users/takehiromizuno/Documents/drive-me-20231202/drive-me/src/@types/types.d";
+import { VehicleAttributes, CalendarInfo } from "/Users/takehiromizuno/Documents/drive-me-20231202/drive-me/src/@types/types.d";
 import { getMonthName } from "/Users/takehiromizuno/Documents/drive-me-20231202/drive-me/src/renderer_process/common_modules.mjs";
-import { ScheduleBar } from "/Users/takehiromizuno/Documents/drive-me-20231202/drive-me/src/renderer_process/display_reservation/schedule_bar.mjs";
 
-const windowContainer: HTMLDivElement = document.querySelector("#window-container") as HTMLDivElement;
 const headerDiv: HTMLDivElement = document.querySelector("#header-div") as HTMLDivElement;
 const vehicleAttributesItemContainer: HTMLDivElement = document.querySelector("#vehicle-attributes-item-container-div") as HTMLDivElement;
 const calendarContainer: HTMLDivElement = document.querySelector("#calendar-container-div") as HTMLDivElement;
-const vehicleShceduleContainer: HTMLDivElement = document.querySelector("#vehicle-schedule-container-div");
+const vehicleScheduleContainer: HTMLDivElement = document.querySelector("#vehicle-schedule-container-div") as HTMLDivElement;
 
 const currentMonthDiv: HTMLDivElement = document.createElement("div");
 Object.assign(currentMonthDiv.style, {
@@ -36,21 +33,6 @@ const previousMonthStart: Date = new Date(currentDate.getFullYear(), currentDate
 const nextMonthEnd: Date = new Date(currentDate.getFullYear(), currentDate.getMonth() + 2, 0, 23, 59, 59, 999);
 const totalMsOfSchedule: number = nextMonthEnd.getTime() - previousMonthStart.getTime();
 
-// const previousMonthCalendar: HTMLDivElement = PreviousMonthCalendar.HTMLDivElement as HTMLDivElement;
-// const currentMonthCalendar: HTMLDivElement = CurrentMonthCalendar.HTMLDivElement as HTMLDivElement;
-// const nextMonthCalendar: HTMLDivElement = NextMonthCalendar.HTMLDivElement as HTMLDivElement;
-
-// calendarContainer.append(previousMonthCalendar, currentMonthCalendar, nextMonthCalendar);
-
-const vehicleScheduleCells: VehicleScheduleCell[] = VehicleScheduleCell.vehicleScheduleCells;
-
-// Rendering necessary elements.
-windowContainer.append(
-    headerDiv,
-    calendarContainer,
-    vehicleAttributesItemContainer,
-);
-
 headerDiv.append(currentMonthDiv);
 
 // Retrieve the width of each calendar and the overall total width of the calendars.
@@ -59,71 +41,114 @@ headerDiv.append(currentMonthDiv);
 // const nextCalendarWidth: number = nextMonthCalendar.offsetWidth;
 // const totalCalendarWidth: number = previousCalendarWidth + currentCalendarWidth + nextCalendarWidth;
 
-// const updateCurrentMonth = () => {
-//     const scrollPosition: number = calendarContainer.scrollLeft;
+const getTotalCalendarWidth = (): number => {
+    const monthCalendars = calendarContainer.children;
+    let totalWidth = 0;
+    for (let i = 0; i < monthCalendars.length; i++) {
+        const monthCalendar: Element = monthCalendars[i];
+        totalWidth += monthCalendar.getBoundingClientRect().width;
+    }
+    return totalWidth;
+}
 
-//     const previousCalendarStart: number = totalCalendarWidth - previousCalendarWidth - currentCalendarWidth - nextCalendarWidth;
-//     const previousCalendarEnd: number = totalCalendarWidth - currentCalendarWidth - nextCalendarWidth;
-//     const currentCalendarEnd: number = totalCalendarWidth - nextCalendarWidth;
+const updateCurrentMonth = (args: {
+    previousCalendarInfo: CalendarInfo,
+    currentCalendarInfo: CalendarInfo,
+    nextCalendarInfo: CalendarInfo
+}) => {
+    const { previousCalendarInfo, currentCalendarInfo, nextCalendarInfo } = args;
 
-//     if (scrollPosition >= previousCalendarStart && scrollPosition < previousCalendarEnd) {
-//         const previousCalendarYear = `${PreviousMonthCalendar.year}年`;
-//         const previousCalendarMonthIndex: number = PreviousMonthCalendar.month as number;
-//         const previousCalendarMonth: string = getMonthName({ monthIndex: previousCalendarMonthIndex });
-//         currentMonthDiv.textContent = `${previousCalendarYear}${previousCalendarMonth}`;
-//     } else if (scrollPosition > previousCalendarEnd && scrollPosition < currentCalendarEnd) {
-//         const currentCalendarYear = `${CurrentMonthCalendar.year}年`;
-//         const currentCalendarMonthIndex: number = CurrentMonthCalendar.month as number;
-//         const currentCalendarMonth: string = getMonthName({ monthIndex: currentCalendarMonthIndex });
-//         currentMonthDiv.textContent = `${currentCalendarYear}${currentCalendarMonth}`;
-//     } else if (scrollPosition > currentCalendarEnd && scrollPosition <= totalCalendarWidth) {
-//         const nextCalendarYear = `${NextMonthCalendar.year}年`;
-//         const nextCalendarMonthIndex: number = NextMonthCalendar.month as number;
-//         const nextCalendarMonth: string = getMonthName({ monthIndex: nextCalendarMonthIndex });
-//         currentMonthDiv.textContent = `${nextCalendarYear}${nextCalendarMonth}`;
-//     }
-// }
+    const scrollPosition: number = calendarContainer.scrollLeft;
 
-// const handleVehicleScheduleScrollX = (): void => {
-//     const calendarContainerScrollLeft: number = calendarContainer.scrollLeft;
-//     vehicleScheduleContainer.scrollLeft = calendarContainerScrollLeft;
-// }
+    const monthCalendars: HTMLCollection = calendarContainer.children;
 
-// const handleVehicleScheduleScrollY = (): void => {
-//     const vehicleAttributesItemScrollTop: number = vehicleAttributesItemContainer.scrollTop;
-//     vehicleScheduleContainer.scrollTop = vehicleAttributesItemScrollTop;
-// }
+    const totalCalendarWidth: number = getTotalCalendarWidth();
+    const previousCalendarWidth: number = monthCalendars[0].getBoundingClientRect().width;
+    const currentCalendarWidth: number = monthCalendars[1].getBoundingClientRect().width;
+    const nextCalendarWidth: number = monthCalendars[2].getBoundingClientRect().width;
 
-// const handleCalendarScroll = (): void => {
-//     const vehicleScheduleScrollLeft: number = vehicleScheduleContainer.scrollLeft;
-//     calendarContainer.scrollLeft = vehicleScheduleScrollLeft;
-// }
+    const previousCalendarStart: number = totalCalendarWidth - previousCalendarWidth - currentCalendarWidth - nextCalendarWidth;
+    const previousCalendarEnd: number = totalCalendarWidth - currentCalendarWidth - nextCalendarWidth;
+    const currentCalendarEnd: number = totalCalendarWidth - nextCalendarWidth;
 
-// const handleVehicleAttributesItemScroll = (): void => {
-//     const vehicleScheduleScrollTop: number = vehicleScheduleContainer.scrollTop;
-//     vehicleAttributesItemContainer.scrollTop = vehicleScheduleScrollTop;
-// }
+    if (scrollPosition >= previousCalendarStart && scrollPosition < previousCalendarEnd) {
+        const previousCalendarYear = `${previousCalendarInfo.year}年`;
+        const previousCalendarMonthIndex: number = previousCalendarInfo.monthIndex;
+        const previousCalendarMonth: string = getMonthName({ monthIndex: previousCalendarMonthIndex });
+        currentMonthDiv.textContent = `${previousCalendarYear}${previousCalendarMonth}`;
+    } else if (scrollPosition > previousCalendarEnd && scrollPosition < currentCalendarEnd) {
+        const currentCalendarYear = `${currentCalendarInfo.year}年`;
+        const currentCalendarMonthIndex: number = currentCalendarInfo.monthIndex;
+        const currentCalendarMonth: string = getMonthName({ monthIndex: currentCalendarMonthIndex });
+        currentMonthDiv.textContent = `${currentCalendarYear}${currentCalendarMonth}`;
+    } else if (scrollPosition > currentCalendarEnd && scrollPosition <= totalCalendarWidth) {
+        const nextCalendarYear = `${nextCalendarInfo.year}年`;
+        const nextCalendarMonthIndex: number = nextCalendarInfo.monthIndex;
+        const nextCalendarMonth: string = getMonthName({ monthIndex: nextCalendarMonthIndex });
+        currentMonthDiv.textContent = `${nextCalendarYear}${nextCalendarMonth}`;
+    }
+}
+
+const handleVehicleScheduleScrollX = (): void => {
+    const calendarContainerScrollLeft: number = calendarContainer.scrollLeft;
+    vehicleScheduleContainer.scrollLeft = calendarContainerScrollLeft;
+}
+
+const handleVehicleScheduleScrollY = (): void => {
+    const vehicleAttributesItemScrollTop: number = vehicleAttributesItemContainer.scrollTop;
+    vehicleScheduleContainer.scrollTop = vehicleAttributesItemScrollTop;
+}
+
+const handleCalendarScroll = (): void => {
+    const vehicleScheduleScrollLeft: number = vehicleScheduleContainer.scrollLeft;
+    calendarContainer.scrollLeft = vehicleScheduleScrollLeft;
+}
+
+const handleVehicleAttributesItemScroll = (): void => {
+    const vehicleScheduleScrollTop: number = vehicleScheduleContainer.scrollTop;
+    vehicleAttributesItemContainer.scrollTop = vehicleScheduleScrollTop;
+}
 
 (async () => {
     const vehicleAttributesArray: VehicleAttributes[] = await window.sqlSelect.vehicleAttributes();
 
-    // const PreviousMonthCalendar: MonthCalendar = new MonthCalendar({ date: previousMonthDate }).getCalendarInfo();
-    const currentMonthCalendarInstance = new MonthCalendar({ calendar: "currentMonth", vehicleAttributesArray: vehicleAttributesArray, date: currentDate });
-    const currentMonthCalendar: HTMLDivElement = currentMonthCalendarInstance.getCalendarInfo().currentMonth.calendarContainer;
+    const previousMonthCalendar = new MonthCalendar({ vehicleAttributesArray: vehicleAttributesArray, date: previousMonthDate });
+    const currentMonthCalendar = new MonthCalendar({ vehicleAttributesArray: vehicleAttributesArray, date: currentDate });
+    const nextMonthCalendar = new MonthCalendar({ vehicleAttributesArray: vehicleAttributesArray, date: nextMonthDate });
 
+    const totalCalendarWidth: number = getTotalCalendarWidth();
+
+    const dayWidth: number = totalCalendarWidth / totalDays;
+    const todayPosition: number = (previousMonthDays + currentDate.getDate()) * dayWidth;
+    const containerWidth: number = vehicleScheduleContainer.getBoundingClientRect().width;
+    const scrollToCenter: number = todayPosition - (containerWidth / 2);
+    vehicleScheduleContainer.scrollLeft = scrollToCenter;
+
+    const scrollHandler = () => {
+        updateCurrentMonth({
+            previousCalendarInfo: previousMonthCalendar.getCalendarInfo(),
+            currentCalendarInfo: currentMonthCalendar.getCalendarInfo(),
+            nextCalendarInfo: nextMonthCalendar.getCalendarInfo()
+        });
+    }
+
+    scrollHandler();
+    calendarContainer.addEventListener("scroll", scrollHandler, false);
+
+    // const PreviousMonthCalendar: MonthCalendar = new MonthCalendar({ date: previousMonthDate }).getCalendarInfo();
     // const NextMonthCalendar: MonthCalendar = new MonthCalendar({ date: nextMonthDate }).getCalendarInfo();
 
-    calendarContainer.append(currentMonthCalendar);
+    // calendarContainer.append(currentMonthCalendar);
+
 
     vehicleAttributesArray.forEach((vehicleAttributes: VehicleAttributes): void => {
         const vehicleAttributesItem = new VehicleAttributesItem({ vehicleAttributes: vehicleAttributes });
         vehicleAttributesItemContainer.append(vehicleAttributesItem);
-
         // const vehicleScheduleCell = VehicleScheduleCell.create({ vehicleAttributes: vehicleAttributes, monthCalendarWidth: `${totalCalendarWidth}px`, daysOfMonth: totalDays });
         // const vehicleScheduleCellElement: HTMLDivElement = vehicleScheduleCell.vehicleScheduleCell as HTMLDivElement;
         // vehicleScheduleCellElement.style.width = `${totalCalendarWidth}px`;
 
-        
+
         // vehicleScheduleContainer.append(vehicleScheduleCellElement);
     });
 
@@ -150,18 +175,8 @@ headerDiv.append(currentMonthDiv);
     //     });
     // });
 
-    // vehicleAttributesItemContainer.addEventListener("scroll", handleVehicleScheduleScrollY);
-    // vehicleScheduleContainer.addEventListener("scroll", handleVehicleAttributesItemScroll);
-    // calendarContainer.addEventListener("scroll", handleVehicleScheduleScrollX);
-    // vehicleScheduleContainer.addEventListener("scroll", handleCalendarScroll);
-
-    // // Handling default scroll posiotion.
-    // const dayWidth: number = currentMonthCalendar.offsetWidth / currentMonthDays;
-    // const todayPosition: number = (previousMonthDays + currentDate.getDate() - 0.5) * dayWidth;
-    // const containerWidth: number = vehicleScheduleContainer.clientWidth;
-    // const scrollToCenter: number = todayPosition - (containerWidth / 2);
-    // vehicleScheduleContainer.scrollLeft = scrollToCenter;
-
-    // updateCurrentMonth();
-    // calendarContainer.addEventListener("scroll", updateCurrentMonth);
+    vehicleAttributesItemContainer.addEventListener("scroll", handleVehicleScheduleScrollY);
+    vehicleScheduleContainer.addEventListener("scroll", handleVehicleAttributesItemScroll);
+    calendarContainer.addEventListener("scroll", handleVehicleScheduleScrollX);
+    vehicleScheduleContainer.addEventListener("scroll", handleCalendarScroll);
 })();

@@ -13,8 +13,8 @@ const VehicleAttributesItem = class extends HTMLDivElement {
             whiteSpace: "nowrap",
             alignItems: "center",
             border: "solid",
-            minWidth: "300px",
-            minHeight: "130px",
+            width: "300px",
+            height: "130px",
             lineHight: "200%"
         });
 

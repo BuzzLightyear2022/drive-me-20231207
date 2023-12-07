@@ -1,30 +1,41 @@
-import { VehicleAttributes, Calendars } from "/Users/takehiromizuno/Documents/drive-me-20231202/drive-me/src/@types/types.d";
+import { VehicleAttributes, CalendarInfo } from "/Users/takehiromizuno/Documents/drive-me-20231202/drive-me/src/@types/types.d";
 import { getMonthName } from "/Users/takehiromizuno/Documents/drive-me-20231202/drive-me/src/renderer_process/common_modules.mjs";
 import { VehicleScheduleCell } from "/Users/takehiromizuno/Documents/drive-me-20231202/drive-me/src/renderer_process/display_reservation/vehicle_schedule_cell.mjs";
 
 const MonthCalendar = class {
-    private calendars: Calendars = {
-        currentMonth: {
-            calendarContainer: undefined,
-            vehicleScheduleContainer: undefined
-        }
-    };
+    private calendarInfo: CalendarInfo = {
+        year: undefined,
+        monthIndex: undefined
+    }
 
     constructor(args: {
-        calendar: string,
         vehicleAttributesArray: VehicleAttributes[],
         date: Date
     }) {
-        const { calendar, vehicleAttributesArray, date } = args;
+        const { date, vehicleAttributesArray } = args;
 
-        const calendarContainer: HTMLDivElement = this.daysContainer({ date: date });
-        const vehicleScheduleContainer: HTMLDivElement = this.vehicleScheduleContainer();
+        const calendarContainer: HTMLDivElement = document.querySelector("#calendar-container-div") as HTMLDivElement;
+        const vehicleScheduleContainer: HTMLDivElement = document.querySelector("#vehicle-schedule-container-div") as HTMLDivElement;
 
-        this.setCalendarContainer({
-            calendar: calendar,
-            calendarContainer: calendarContainer,
-            vehicleScheduleContainer: vehicleScheduleContainer
+        const innerVehicleScheduleContainer: HTMLDivElement = this.innerVehicleScheduleContainer();
+
+        const daysContainer: HTMLDivElement = this.daysContainer({ date: date });
+        calendarContainer.append(daysContainer);
+
+        const daysContainerWidth: number = daysContainer.getBoundingClientRect().width;
+
+        vehicleAttributesArray.forEach((vehicleAttributes: VehicleAttributes) => {
+            const vehicleScheduleCell: HTMLDivElement = new VehicleScheduleCell({
+                vehicleAttributes: vehicleAttributes,
+                vehicleCalendarWidth: `${daysContainerWidth}px`
+            });
+            innerVehicleScheduleContainer.append(vehicleScheduleCell);
         });
+
+        vehicleScheduleContainer.append(innerVehicleScheduleContainer);
+
+        this.calendarInfo.year = date.getFullYear();
+        this.calendarInfo.monthIndex = date.getMonth();
     }
 
     private daysContainer(args: { date: Date }): HTMLDivElement {
@@ -59,37 +70,22 @@ const MonthCalendar = class {
 
             daysContainer.append(dayCell);
         }
-
         return daysContainer;
     }
 
-    private vehicleScheduleContainer = (): HTMLDivElement => {
+    private innerVehicleScheduleContainer = (): HTMLDivElement => {
         const vehicleScheduleContainer: HTMLDivElement = document.createElement("div");
         Object.assign(vehicleScheduleContainer.style, {
             display: "flex",
-            flexDirection: "column"
+            flexDirection: "column",
+            flexBasis: "content",
+            whiteSpace: "nowrap",
         });
         return vehicleScheduleContainer;
     }
 
-    private setCalendarContainer(args: {
-        calendar: string,
-        calendarContainer: HTMLDivElement,
-        vehicleScheduleContainer: HTMLDivElement
-    }) {
-        const { calendar, calendarContainer, vehicleScheduleContainer } = args;
-
-        switch (calendar) {
-            case "currentMonth":
-                this.calendars.currentMonth.calendarContainer = calendarContainer;
-                this.calendars.currentMonth.vehicleScheduleContainer = vehicleScheduleContainer;
-                break;
-        }
-
-    }
-
     getCalendarInfo() {
-        return this.calendars;
+        return this.calendarInfo;
     }
 }
 

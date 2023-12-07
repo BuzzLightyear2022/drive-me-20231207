@@ -69,9 +69,7 @@ export type VehicleScheduleCell = {
     maintenanceScheduleDiv: HTMLDivElement | undefined
 }
 
-export type Calendars = {
-    currentMonth: {
-        calendarContainer: HTMLDivElement | undefined
-        vehicleScheduleContainer: HTMLDivElement | undefined
-    }
+export type CalendarInfo = {
+    year: number | undefined
+    monthIndex: number | undefined
 }
