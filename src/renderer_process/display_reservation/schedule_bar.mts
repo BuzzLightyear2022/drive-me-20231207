@@ -2,6 +2,7 @@ import { ReservationData } from "/Users/takehiromizuno/Documents/drive-me-202312
 
 const ScheduleBar = class extends HTMLDivElement {
     private reservationData: ReservationData;
+    static scheduleBars: HTMLDivElement[] = [];
 
     constructor(args: { reservationData: ReservationData, startMs: number, totalMsOfSchedule: number, previousScheduleBarWidth: string, color: string }) {
         super();
@@ -29,16 +30,13 @@ const ScheduleBar = class extends HTMLDivElement {
             backgroundColor: color,
             whiteSpace: "nowrap",
             overflow: "scroll",
-            // zIndex: 2
         });
 
         const departureReturnInfoDiv: HTMLDivElement = this.departureReturnInfoDiv();
         const reservationNameDiv: HTMLDivElement = this.reservationNameDiv();
         this.append(departureReturnInfoDiv, reservationNameDiv);
 
-        // this.addEventListener("click", () => {
-
-        // }, false);
+        ScheduleBar.scheduleBars.push(this);
     }
 
     private departureReturnInfoDiv = () => {

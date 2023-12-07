@@ -3,6 +3,8 @@ import { getMonthName } from "/Users/takehiromizuno/Documents/drive-me-20231202/
 import { VehicleScheduleCell } from "/Users/takehiromizuno/Documents/drive-me-20231202/drive-me/src/renderer_process/display_reservation/vehicle_schedule_cell.mjs";
 import { ScheduleBar } from "/Users/takehiromizuno/Documents/drive-me-20231202/drive-me/src/renderer_process/display_reservation/schedule_bar.mjs";
 
+const body: HTMLBodyElement = document.querySelector("body");
+
 const MonthCalendar = class {
     private calendarInfo: CalendarInfo = {
         year: undefined,
@@ -46,7 +48,6 @@ const MonthCalendar = class {
 
             const reservationData: ReservationData[] = await window.sqlSelect.reservationData({ startDate: start, endDate: end });
             const vehicleScheduleCells = VehicleScheduleCell.vehicleScheduleCells;
-            console.log(vehicleScheduleCells);
 
             reservationData.forEach((reservationData: ReservationData) => {
                 vehicleScheduleCells.forEach((vehicleScheduleCell: VehicleScheduleCell) => {
@@ -66,6 +67,14 @@ const MonthCalendar = class {
                         reservationDisplayDiv.append(scheduleBar);
                     }
                 });
+            });
+
+            ScheduleBar.scheduleBars.forEach((scheduleBar: HTMLDivElement) => {
+                scheduleBar.addEventListener("click", () => {
+                    console.log(true);
+                    const backgroundDiv: HTMLDivElement = this.backgroundDiv();
+                    body.append(backgroundDiv);
+                }, false)
             });
         })();
     }
@@ -100,6 +109,10 @@ const MonthCalendar = class {
             const monthIndex: number = new Date(date).getMonth();
             dayCell.textContent = i === 1 ? `${getMonthName({ monthIndex })}${i}日` : `${i}日`;
 
+            if (i === date.getDate()) {
+                dayCell.style.backgroundColor = "red"
+            }
+
             daysContainer.append(dayCell);
         }
         return daysContainer;
@@ -114,6 +127,17 @@ const MonthCalendar = class {
             whiteSpace: "nowrap",
         });
         return vehicleScheduleContainer;
+    }
+
+    private backgroundDiv = (): HTMLDivElement => {
+        const backgroundDiv: HTMLDivElement = document.createElement("div");
+        Object.assign(backgroundDiv.style, {
+            width: "100vw",
+            height: "100vh",
+            backgroundColor: "blue",
+            zIndex: 2
+        })
+        return backgroundDiv;
     }
 
     getCalendarInfo() {
