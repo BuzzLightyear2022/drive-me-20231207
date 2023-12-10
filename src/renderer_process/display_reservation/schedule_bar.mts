@@ -1,13 +1,19 @@
 import { ReservationData } from "/Users/takehiromizuno/Documents/drive-me-20231202/drive-me/src/@types/types.d";
 
-const ScheduleBar = class extends HTMLDivElement {
-    private reservationData: ReservationData;
+const ScheduleBar = class {
     static scheduleBars: HTMLDivElement[] = [];
+    reservationData: ReservationData;
+    scheduleBar: HTMLDivElement;
 
-    constructor(args: { reservationData: ReservationData, startMs: number, totalMsOfSchedule: number, previousScheduleBarWidth: string, color: string }) {
-        super();
-
+    constructor(args: {
+        reservationData: ReservationData,
+        startMs: number,
+        totalMsOfSchedule: number,
+        previousScheduleBarWidth: string,
+        color: string
+    }) {
         const { reservationData, startMs, totalMsOfSchedule, previousScheduleBarWidth, color } = args;
+
         this.reservationData = reservationData;
 
         const departureDatetime: Date = new Date(reservationData.departureDatetime);
@@ -17,9 +23,8 @@ const ScheduleBar = class extends HTMLDivElement {
         const relativeWidth = `${(diffInTime / totalMsOfSchedule) * 100}%`;
         const diffFromStart = `${((departureDatetime.getTime() - startMs) / totalMsOfSchedule) * 100}%`;
 
-        this.className = "card";
-
-        Object.assign(this.style, {
+        const scheduleBar: HTMLDivElement = document.createElement("div");
+        Object.assign(scheduleBar.style, {
             display: "flex",
             flexDirection: "row",
             position: "relative",
@@ -31,19 +36,70 @@ const ScheduleBar = class extends HTMLDivElement {
             whiteSpace: "nowrap",
             overflow: "scroll",
         });
+        scheduleBar.className = "card";
 
         const departureReturnInfoDiv: HTMLDivElement = this.departureReturnInfoDiv();
         const reservationNameDiv: HTMLDivElement = this.reservationNameDiv();
-        this.append(departureReturnInfoDiv, reservationNameDiv);
 
-        ScheduleBar.scheduleBars.push(this);
+        this.scheduleBar = scheduleBar;
+        ScheduleBar.scheduleBars.push(scheduleBar);
+
+        scheduleBar.append(departureReturnInfoDiv, reservationNameDiv);
+
+        return this;
     }
 
     private departureReturnInfoDiv = () => {
-        const departureTimeDiv: HTMLDivElement = this.departureTimeDiv();
-        const departureStoreDiv: HTMLDivElement = this.departureStoreDiv();
-        const returnTimeDiv: HTMLDivElement = this.returnTimeDiv();
-        const returnStoreDiv: HTMLDivElement = this.returnStoreDiv();
+        const DepartureTimeDiv = () => {
+            const departureDatetime: Date = new Date(this.reservationData.departureDatetime);
+            const departureHour = String(departureDatetime.getHours());
+            const departureMinutes: string = String(departureDatetime.getMinutes()).padStart(2, "0");
+            const departureTime = `${departureHour}:${departureMinutes}`;
+            const departureTimeDiv: HTMLDivElement = document.createElement("div");
+            Object.assign(departureTimeDiv.style, {
+                gridRow: "1",
+                gridColumn: "1"
+            });
+            departureTimeDiv.textContent = departureTime;
+            return departureTimeDiv;
+        }
+
+        const DepartureStoreDiv = () => {
+            const departureStore: string = this.reservationData.departureStore;
+            const departureStoreDiv: HTMLDivElement = document.createElement("div");
+            Object.assign(departureStoreDiv.style, {
+                gridRow: "1",
+                gridColumn: "2"
+            });
+            departureStoreDiv.textContent = departureStore;
+            return departureStoreDiv;
+        }
+
+        const ReturnTimeDiv = () => {
+            const returnDatetime: Date = new Date(this.reservationData.returnDatetime);
+            const returnHour = String(returnDatetime.getHours());
+            const returnMinutes: string = String(returnDatetime.getMinutes()).padStart(2, "0");
+            const returnTime = `${returnHour}:${returnMinutes}`;
+            const returnTimeDiv: HTMLDivElement = document.createElement("div");
+            Object.assign(returnTimeDiv.style, {
+                gridRow: "2",
+                gridColumn: "1"
+            });
+            returnTimeDiv.textContent = returnTime;
+
+            return returnTimeDiv;
+        }
+
+        const ReturnStoreDiv = () => {
+            const returnStore: string = this.reservationData.returnStore;
+            const returnStoreDiv: HTMLDivElement = document.createElement("div");
+            Object.assign(returnStoreDiv.style, {
+                gridRow: "2",
+                gridColumn: "2"
+            });
+            returnStoreDiv.textContent = returnStore;
+            return returnStoreDiv;
+        }
 
         const departureReturnInfoDiv: HTMLDivElement = document.createElement("div");
         Object.assign(departureReturnInfoDiv.style, {
@@ -51,60 +107,13 @@ const ScheduleBar = class extends HTMLDivElement {
             height: "100%",
             width: "100px"
         });
+        const departureTimeDiv: HTMLDivElement = DepartureTimeDiv();
+        const departureStoreDiv: HTMLDivElement = DepartureStoreDiv();
+        const returnTimeDiv: HTMLDivElement = ReturnTimeDiv();
+        const returnStoreDiv: HTMLDivElement = ReturnStoreDiv();
 
         departureReturnInfoDiv.append(departureTimeDiv, departureStoreDiv, returnTimeDiv, returnStoreDiv);
         return departureReturnInfoDiv;
-    }
-
-    private departureTimeDiv = () => {
-        const departureDatetime: Date = new Date(this.reservationData.departureDatetime);
-        const departureHour = String(departureDatetime.getHours());
-        const departureMinutes: string = String(departureDatetime.getMinutes()).padStart(2, "0");
-        const departureTime = `${departureHour}:${departureMinutes}`;
-        const departureTimeDiv: HTMLDivElement = document.createElement("div");
-        Object.assign(departureTimeDiv.style, {
-            gridRow: "1",
-            gridColumn: "1"
-        });
-        departureTimeDiv.textContent = departureTime;
-        return departureTimeDiv;
-    }
-
-    private departureStoreDiv = () => {
-        const departureStore: string = this.reservationData.departureStore;
-        const departureStoreDiv: HTMLDivElement = document.createElement("div");
-        Object.assign(departureStoreDiv.style, {
-            gridRow: "1",
-            gridColumn: "2"
-        });
-        departureStoreDiv.textContent = departureStore;
-        return departureStoreDiv;
-    }
-
-    private returnTimeDiv = () => {
-        const returnDatetime: Date = new Date(this.reservationData.returnDatetime);
-        const returnHour = String(returnDatetime.getHours());
-        const returnMinutes: string = String(returnDatetime.getMinutes()).padStart(2, "0");
-        const returnTime = `${returnHour}:${returnMinutes}`;
-        const returnTimeDiv: HTMLDivElement = document.createElement("div");
-        Object.assign(returnTimeDiv.style, {
-            gridRow: "2",
-            gridColumn: "1"
-        });
-        returnTimeDiv.textContent = returnTime;
-
-        return returnTimeDiv;
-    }
-
-    private returnStoreDiv = () => {
-        const returnStore: string = this.reservationData.returnStore;
-        const returnStoreDiv: HTMLDivElement = document.createElement("div");
-        Object.assign(returnStoreDiv.style, {
-            gridRow: "2",
-            gridColumn: "2"
-        });
-        returnStoreDiv.textContent = returnStore;
-        return returnStoreDiv;
     }
 
     private reservationNameDiv = () => {
@@ -117,7 +126,5 @@ const ScheduleBar = class extends HTMLDivElement {
         return reservationNameDiv;
     }
 }
-
-customElements.define("schedule-bar", ScheduleBar, { extends: "div" });
 
 export { ScheduleBar }

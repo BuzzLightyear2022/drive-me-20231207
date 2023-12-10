@@ -58,19 +58,23 @@ export type Navigations = {
 
 export type MonthCalendar = {
     HTMLDivElement: HTMLDivElement | undefined
-    month: number | undefined,
+    month: number | undefined;
     year: number | undefined
-}
-
-export type VehicleScheduleCell = {
-    vehicleId: string | undefined
-    monthIndex: number | undefined
-    vehicleScheduleCell: HTMLDivElement | undefined
-    reservationScheduleDiv: HTMLDivElement | undefined
-    maintenanceScheduleDiv: HTMLDivElement | undefined
 }
 
 export type CalendarInfo = {
-    year: number | undefined
-    monthIndex: number | undefined
+    year: number | undefined;
+    monthIndex: number | undefined;
+}
+
+export type ScheduleBarType = {
+    reservationData: ReservationData;
+    scheduleBar: HTMLDivElement;
+}
+
+export type VehicleScheduleCellInfo = {
+    vehicleId: string;
+    vehicleScheduleCell: HTMLDivElement;
+    reservationScheduleDiv: HTMLDivElement;
+    maintenanceScheduleDiv: HTMLDivElement;
 }

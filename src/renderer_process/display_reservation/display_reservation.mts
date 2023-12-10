@@ -2,6 +2,7 @@ import { VehicleAttributesItem } from "/Users/takehiromizuno/Documents/drive-me-
 import { MonthCalendar } from "/Users/takehiromizuno/Documents/drive-me-20231202/drive-me/src/renderer_process/display_reservation/month_calendar.mjs";
 import { VehicleAttributes, CalendarInfo } from "/Users/takehiromizuno/Documents/drive-me-20231202/drive-me/src/@types/types.d";
 import { getMonthName } from "/Users/takehiromizuno/Documents/drive-me-20231202/drive-me/src/renderer_process/common_modules.mjs";
+import { ScheduleBar } from "/Users/takehiromizuno/Documents/drive-me-20231202/drive-me/src/renderer_process/display_reservation/schedule_bar.mjs";
 
 const headerDiv: HTMLDivElement = document.querySelector("#header-div") as HTMLDivElement;
 const vehicleAttributesItemContainer: HTMLDivElement = document.querySelector("#vehicle-attributes-item-container-div") as HTMLDivElement;
@@ -27,10 +28,6 @@ const previousMonthDays: number = new Date(currentDate.getFullYear(), currentDat
 const currentMonthDays: number = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 0).getDate();
 const nextMonthDays: number = new Date(currentDate.getFullYear(), currentDate.getMonth() + 2, 0).getDate();
 const totalDays: number = previousMonthDays + currentMonthDays + nextMonthDays;
-
-// retrieve ms of total days.
-const previousMonthStart: Date = new Date(currentDate.getFullYear(), currentDate.getMonth() - 1, 1, 0, 0, 0, 0);
-const nextMonthEnd: Date = new Date(currentDate.getFullYear(), currentDate.getMonth() + 2, 0, 23, 59, 59, 999);
 
 headerDiv.append(currentMonthDiv);
 
@@ -138,3 +135,4 @@ const handleVehicleAttributesItemScroll = (): void => {
     calendarContainer.addEventListener("scroll", handleVehicleScheduleScrollX);
     vehicleScheduleContainer.addEventListener("scroll", handleCalendarScroll);
 })();
+
