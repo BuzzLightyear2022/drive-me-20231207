@@ -1,4 +1,4 @@
-import { app, ipcMain } from "electron";
+import { app, ipcMain, Menu, ipcRenderer } from "electron";
 import FormData from "form-data";
 import axios, { AxiosResponse } from "axios";
 import { WindowHandler } from "/Users/takehiromizuno/Documents/drive-me-20231202/drive-me/src/main_process/window_handler.mjs";
@@ -17,18 +17,18 @@ const imageDirectory: string = process.env.IMAGE_DIRECTORY as string;
 
 app.on("ready", WindowHandler.createMainWindow);
 
-app.on("window-all-closed", () => {
-    if (process.platform !== "darwin") {
-        app.quit();
-    }
-    WindowHandler.windows.splice(0, WindowHandler.windows.length);
-});
+// app.on("window-all-closed", () => {
+//     if (process.platform !== "darwin") {
+//         app.quit();
+//     }
+//     WindowHandler.windows.splice(0, WindowHandler.windows.length);
+// });
 
-app.on("activate", () => {
-    if (!WindowHandler.windows.length) {
-        WindowHandler.createMainWindow();
-    }
-});
+// app.on("activate", () => {
+//     if (!WindowHandler.windows.length) {
+//         WindowHandler.createMainWindow();
+//     }
+// });
 
 ipcMain.handle("serverInfo:serverHost", (): string => {
     return serverHost;
@@ -74,13 +74,23 @@ ipcMain.handle("fetchJson:navigations", async (): Promise<JSON | unknown> => {
     }
 });
 
-ipcMain.handle("sqlSelect:vehicleAttributes", async (event: Electron.IpcMainInvokeEvent) => {
+ipcMain.handle("sqlSelect:vehicleAttributes", async () => {
     const serverEndPoint = `http://${serverHost}:${port}/sqlSelect/vehicleAttributes`;
     try {
         const response: AxiosResponse = await axios.post(serverEndPoint);
         return response.data;
     } catch (error: unknown) {
         return console.error(`Failed to select vehicleAttributes: ${error}`);
+    }
+});
+
+ipcMain.handle("sqlSelect:vehicleAttributesById", async (event: Electron.IpcMainEvent, args: { vehicleId: string }) => {
+    const serverEndPoint = `http://${serverHost}:${port}/sqlSelect/vehicleAttributesById`;
+    try {
+        const response: AxiosResponse = await axios.post(serverEndPoint, args);
+        return response.data;
+    } catch (error: unknown) {
+        return console.error(`Failed to select vehicleAttributes by id ${error}`);
     }
 });
 
@@ -115,14 +125,27 @@ ipcMain.handle("sqlSelect:licensePlates", async (event: Electron.IpcMainInvokeEv
 });
 
 ipcMain.handle("sqlSelect:reservationData", async (event: Electron.IpcMainInvokeEvent, args: {
-    startDate: Date, endDate: Date
+    startDate: Date,
+    endDate: Date
 }) => {
-    const serverEndPoint = `http://${serverHost}:${port}/sqlSelect/reservationData`;
+    const serverEndPoint = `http://${serverHost}:${port}/sqlSelect/reservationData/filterByDateRange`;
     try {
         const response: AxiosResponse = await axios.post(serverEndPoint, args);
         return response.data;
     } catch (error: unknown) {
         console.error(`Failed to fetch reservation data: ${error}`)
+    }
+});
+
+ipcMain.handle("sqlSelect:reservationDataById", async (event: Electron.IpcMainInvokeEvent, args: {
+    reservationId: string
+}) => {
+    const serverEndPoint = `http://${serverHost}:${port}/sqlSelect/reservationData/selectById`;
+    try {
+        const response: AxiosResponse = await axios.post(serverEndPoint, args);
+        return response.data;
+    } catch (error: unknown) {
+        return `Failed to select reservation data by id. ${error}`;
     }
 });
 
@@ -184,4 +207,8 @@ ipcMain.handle("sqlInsert:reservationData", async (event: Electron.IpcMainInvoke
     } catch (error: unknown) {
         return `Failed to send reservation data: ${error}`;
     }
+});
+
+ipcMain.on("contextMenu:schedule-bar", () => {
+    return;
 });

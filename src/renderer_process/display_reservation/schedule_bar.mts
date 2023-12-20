@@ -1,7 +1,7 @@
-import { ReservationData } from "/Users/takehiromizuno/Documents/drive-me-20231202/drive-me/src/@types/types.d";
+import { ReservationData, ScheduleBarInfo } from "/Users/takehiromizuno/Documents/drive-me-20231202/drive-me/src/@types/types.d";
 
 const ScheduleBar = class {
-    static scheduleBars: HTMLDivElement[] = [];
+    static scheduleBars: ScheduleBarInfo[] = [];
     reservationData: ReservationData;
     scheduleBar: HTMLDivElement;
 
@@ -41,12 +41,16 @@ const ScheduleBar = class {
         const departureReturnInfoDiv: HTMLDivElement = this.departureReturnInfoDiv();
         const reservationNameDiv: HTMLDivElement = this.reservationNameDiv();
 
-        this.scheduleBar = scheduleBar;
-        ScheduleBar.scheduleBars.push(scheduleBar);
+        const scheduleBarInfo = {
+            divElement: scheduleBar,
+            reservationData: reservationData
+        }
+
+        ScheduleBar.scheduleBars.push(scheduleBarInfo);
 
         scheduleBar.append(departureReturnInfoDiv, reservationNameDiv);
 
-        return this;
+        this.scheduleBar = scheduleBar;
     }
 
     private departureReturnInfoDiv = () => {
@@ -124,6 +128,14 @@ const ScheduleBar = class {
         });
         reservationNameDiv.textContent = reservationName;
         return reservationNameDiv;
+    }
+
+    getReservationData() {
+        return this.reservationData;
+    }
+
+    getScheduleBarElement() {
+        return this.scheduleBar;
     }
 }
 

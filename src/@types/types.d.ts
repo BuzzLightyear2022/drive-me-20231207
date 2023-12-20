@@ -36,6 +36,7 @@ export type VehicleAttributes = {
 }
 
 export type ReservationData = {
+    id?: string
     vehicleId: string,
     reservationName: string,
     rentalCategory: string,
@@ -67,9 +68,9 @@ export type CalendarInfo = {
     monthIndex: number | undefined;
 }
 
-export type ScheduleBarType = {
+export type ScheduleBarInfo = {
     reservationData: ReservationData;
-    scheduleBar: HTMLDivElement;
+    divElement: HTMLDivElement;
 }
 
 export type VehicleScheduleCellInfo = {
@@ -77,4 +78,12 @@ export type VehicleScheduleCellInfo = {
     vehicleScheduleCell: HTMLDivElement;
     reservationScheduleDiv: HTMLDivElement;
     maintenanceScheduleDiv: HTMLDivElement;
+}
+
+export type Windows = {
+    mainWindow: BrowserWindow,
+    insertVehicleAttributesWindow: BrowserWindow,
+    insertReservationWindow: BrowserWindow,
+    displayReservationWindow: BrowserWindow,
+    editReservationWindow: BrowserWindow
 }

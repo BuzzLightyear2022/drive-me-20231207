@@ -6,10 +6,8 @@ const appendOptions = (
     }
 ): void => {
     const { selectbox, options, values } = args;
-    if (selectbox.children) {
-        while (selectbox.firstChild) {
-            selectbox.removeChild(selectbox.firstChild);
-        }
+    while (selectbox.firstChild) {
+        selectbox.removeChild(selectbox.firstChild);
     }
 
     if (options) {

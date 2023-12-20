@@ -60,6 +60,12 @@ contextBridge.exposeInMainWorld(
         },
         reservationData: async (args: { startDate: Date, endDate: Date }) => {
             return await ipcRenderer.invoke("sqlSelect:reservationData", args);
+        },
+        reservationDataById: async (args: { reservationId: string }) => {
+            return await ipcRenderer.invoke("sqlSelect:reservationDataById", args);
+        },
+        vehicleAttributesById: async (args: { vehicleId: string }) => {
+            return await ipcRenderer.invoke("sqlSelect:vehicleAttributesById", args);
         }
     }
 );
@@ -73,5 +79,15 @@ contextBridge.exposeInMainWorld(
         reservationData: async (reservationData: ReservationData): Promise<string> => {
             return await ipcRenderer.invoke("sqlInsert:reservationData", reservationData);
         }
+    }
+);
+
+contextBridge.exposeInMainWorld(
+    "contextMenu",
+    {
+        scheduleBar: async (args: { reservationId: string }) => {
+            ipcRenderer.send("contextMenu:schedule-bar", args);
+        },
+        getReservationId: (callback: (reservationId: string) => void) => ipcRenderer.on("contextMenu:getReservationId", (event: Electron.IpcRendererEvent, reservationId: string) => callback(reservationId))
     }
 );

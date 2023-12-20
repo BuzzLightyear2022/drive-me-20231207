@@ -1,9 +1,10 @@
 import { VehicleAttributesItem } from "/Users/takehiromizuno/Documents/drive-me-20231202/drive-me/src/renderer_process/display_reservation/vehicle_attributes_item.mjs";
 import { MonthCalendar } from "/Users/takehiromizuno/Documents/drive-me-20231202/drive-me/src/renderer_process/display_reservation/month_calendar.mjs";
-import { VehicleAttributes, CalendarInfo } from "/Users/takehiromizuno/Documents/drive-me-20231202/drive-me/src/@types/types.d";
+import { VehicleAttributes, CalendarInfo, ScheduleBarInfo, ReservationData } from "/Users/takehiromizuno/Documents/drive-me-20231202/drive-me/src/@types/types.d";
 import { getMonthName } from "/Users/takehiromizuno/Documents/drive-me-20231202/drive-me/src/renderer_process/common_modules.mjs";
 import { ScheduleBar } from "/Users/takehiromizuno/Documents/drive-me-20231202/drive-me/src/renderer_process/display_reservation/schedule_bar.mjs";
 
+const body: HTMLBodyElement = document.querySelector("body");
 const headerDiv: HTMLDivElement = document.querySelector("#header-div") as HTMLDivElement;
 const vehicleAttributesItemContainer: HTMLDivElement = document.querySelector("#vehicle-attributes-item-container-div") as HTMLDivElement;
 const calendarContainer: HTMLDivElement = document.querySelector("#calendar-container-div") as HTMLDivElement;
@@ -106,6 +107,39 @@ const handleVehicleAttributesItemScroll = (): void => {
     const currentMonthCalendar = new MonthCalendar({ vehicleAttributesArray: vehicleAttributesArray, date: currentDate });
     const nextMonthCalendar = new MonthCalendar({ vehicleAttributesArray: vehicleAttributesArray, date: nextMonthDate });
 
+    await Promise.all([
+        previousMonthCalendar.initialize(),
+        currentMonthCalendar.initialize(),
+        nextMonthCalendar.initialize()
+    ]);
+
+    const modalBackgroundDiv: HTMLDivElement = MonthCalendar.backgroundDiv();
+    ScheduleBar.scheduleBars.forEach((scheduleBar: ScheduleBarInfo) => {
+        scheduleBar.divElement.addEventListener("click", (event: MouseEvent) => {
+            while (modalBackgroundDiv.firstChild) {
+                modalBackgroundDiv.removeChild(modalBackgroundDiv.firstChild);
+            }
+
+            const reservationData: ReservationData = scheduleBar.reservationData;
+            const reservationInfoModal: HTMLDivElement = MonthCalendar.reservationInfoModal({ reservationData: reservationData, mouseEvent: event });
+            modalBackgroundDiv.append(reservationInfoModal);
+            body.append(modalBackgroundDiv);
+        }, false);
+    });
+
+    ScheduleBar.scheduleBars.forEach((scheduleBar: ScheduleBarInfo) => {
+        const reservationId: string = scheduleBar.reservationData.id;
+        scheduleBar.divElement.addEventListener("contextmenu", async (event: MouseEvent) => {
+            await window.contextMenu.scheduleBar({ reservationId: reservationId });
+        }, false);
+    });
+
+    window.addEventListener("click", (event: MouseEvent) => {
+        if (event.target === modalBackgroundDiv) {
+            modalBackgroundDiv.remove();
+        }
+    }, false);
+
     const totalCalendarWidth: number = getTotalCalendarWidth();
 
     const dayWidth: number = totalCalendarWidth / totalDays;
@@ -135,4 +169,3 @@ const handleVehicleAttributesItemScroll = (): void => {
     calendarContainer.addEventListener("scroll", handleVehicleScheduleScrollX);
     vehicleScheduleContainer.addEventListener("scroll", handleCalendarScroll);
 })();
-

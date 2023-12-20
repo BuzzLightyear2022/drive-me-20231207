@@ -19,15 +19,22 @@ export interface fetchJson {
 
 export interface sqlSelect {
     vehicleAttributes: () => Promise<VehicleAttributesArray>;
+    vehicleAttributesById: (args: { vehicleId: string }) => Promise<VehicleAttributes>
     rentalClasses: (args: { selectedSmoking: string }) => Promise<string[]>;
     carModels: (args: { selectedSmoking: string, selectedRentalClass: string }) => Promise<string[]>;
     licensePlates: (args: { selectedSmoking: string, selectedCarModel: string }) => Promise<LicensePlatesData>;
     reservationData: (args: { startDate: Date, endDate: Date }) => Promise<>;
+    reservationDataById: (args: { reservationId: string }) => Promise<ReservationData>;
 }
 
 export interface sqlInsert {
     vehicleAttributes: (vehicleAttributes: VehicleAttributes) => Promise<string>;
     reservationData: (reservationData: ReservationData) => Promise<string>
+}
+
+export interface contextMenu {
+    scheduleBar: (args: { reservationId: string }) => Promise<void>;
+    getReservationId: (callback) => void;
 }
 
 declare global {
@@ -37,5 +44,6 @@ declare global {
         fetchJson: fetchJson;
         sqlSelect: sqlSelect;
         sqlInsert: sqlInsert;
+        contextMenu: contextMenu;
     }
 }
