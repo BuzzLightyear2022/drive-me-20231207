@@ -120,7 +120,6 @@ class WindowHandler {
             contextMenu.popup(WindowHandler.windows.displayReservationWindow);
         });
 
-
         if (MAIN_WINDOW_VITE_DEV_SERVER_URL) {
             win.loadURL(`${MAIN_WINDOW_VITE_DEV_SERVER_URL}/display_reservation.html`);
             WindowHandler.windows.displayReservationWindow = win;

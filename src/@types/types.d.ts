@@ -71,6 +71,7 @@ export type CalendarInfo = {
 export type ScheduleBarInfo = {
     reservationData: ReservationData;
     divElement: HTMLDivElement;
+    instance
 }
 
 export type VehicleScheduleCellInfo = {

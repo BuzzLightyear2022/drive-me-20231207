@@ -1,4 +1,5 @@
 import { CarCatalog, LicensePlatesData, ReservationData, Navigations, VehicleAttributes, VehicleAttributesArray } from "../types";
+import { ipcRenderer } from "electron";
 
 export interface serverInfo {
     serverHost: () => Promise<string>;
@@ -32,9 +33,14 @@ export interface sqlInsert {
     reservationData: (reservationData: ReservationData) => Promise<string>
 }
 
+export interface sqlUpdate {
+    reservationData: (reservationData: ReservationData) => Promise<void>
+}
+
 export interface contextMenu {
     scheduleBar: (args: { reservationId: string }) => Promise<void>;
     getReservationId: (callback) => void;
+    getEditedReservationData: (callback: (reservationData: ReservationData) => void) => void;
 }
 
 declare global {
@@ -44,6 +50,7 @@ declare global {
         fetchJson: fetchJson;
         sqlSelect: sqlSelect;
         sqlInsert: sqlInsert;
+        sqlUpdate: sqlUpdate
         contextMenu: contextMenu;
     }
 }

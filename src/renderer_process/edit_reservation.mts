@@ -36,30 +36,6 @@ const getRadioValue = (args: { radios: NodeListOf<HTMLInputElement>, defaultValu
     return selectedValue;
 }
 
-const selectBoxInitializer = async () => {
-    const selectedSmoking: string = getRadioValue({ radios: nonSmokingRadios, defaultValue: "none-spacification" });
-
-    const rentalClasses: string[] = await window.sqlSelect.rentalClasses({ selectedSmoking: selectedSmoking });
-
-    appendOptions({ selectbox: rentalClassSelect, options: rentalClasses });
-
-    const selectedRentalClass: string = rentalClassSelect.value;
-    const carModels: string[] = await window.sqlSelect.carModels({ selectedSmoking: selectedSmoking, selectedRentalClass: selectedRentalClass });
-
-    appendOptions({ selectbox: carModelSelect, options: carModels });
-
-    const selectedCarModel: string = carModelSelect.value;
-    const licensePlatesData: LicensePlatesData = await window.sqlSelect.licensePlates({ selectedSmoking: selectedSmoking, selectedCarModel: selectedCarModel });
-    const licensePlatesArray: string[] = licensePlatesData.map((licensePlateData: { id: string, licensePlate: string }): string => {
-        return licensePlateData.licensePlate;
-    });
-    const idsArray: string[] = licensePlatesData.map((licensePlateData: { id: string, licensePlate: string }) => {
-        return licensePlateData.id;
-    });
-
-    appendOptions({ selectbox: licensePlateSelect, options: licensePlatesArray, values: idsArray });
-}
-
 const setRentalClassSelectValue = async () => {
     const selectedSmoking: string = getRadioValue({ radios: nonSmokingRadios, defaultValue: "none-spacification" });
 
@@ -106,41 +82,56 @@ window.contextMenu.getReservationId(async (reservationId: string) => {
     departureDatetimeInput.value = departureDatetime.toISOString().slice(0, 16);
     returnDatetimeInput.value = returnDatetime.toISOString().slice(0, 16);
     setRadioValue({ radios: nonSmokingRadios, checkedValue: reservationData.nonSmoking });
+
     await setRentalClassSelectValue();
     rentalClassSelect.value = vehicleAttributes.rentalClass;
     await setCarModelSelectValue();
     carModelSelect.value = vehicleAttributes.carModel;
     await setLicensePlateSelectValue();
     licensePlateSelect.value = vehicleAttributes.id;
+
     commentTextarea.value = reservationData.comment;
+
+    submitButton.addEventListener("click", async () => {
+        const selectedRentalCategory: string = getRadioValue({ radios: rentalCategoryRadios, defaultValue: "general-rental" });
+        const selectedSmoking: string = getRadioValue({ radios: nonSmokingRadios, defaultValue: "none-specification" });
+        const selectedDepartureDatetime: Date = new Date(departureDatetimeInput.value);
+        const selectedReturnDatetime: Date = new Date(returnDatetimeInput.value);
+
+        const postReservationData: ReservationData = {
+            id: reservationData.id,
+            vehicleId: licensePlateSelect.value,
+            reservationName: reservationName.value,
+            rentalCategory: selectedRentalCategory,
+            departureStore: departureStoreSelect.value,
+            returnStore: returnStoreSelect.value,
+            departureDatetime: selectedDepartureDatetime,
+            returnDatetime: selectedReturnDatetime,
+            nonSmoking: selectedSmoking,
+            comment: commentTextarea.value
+        }
+
+        try {
+            await window.sqlUpdate.reservationData(postReservationData);
+        } catch (error: unknown) {
+            console.error(`Failed to invoke reservationData: ${error}`);
+        }
+    }, false);
 });
 
-submitButton.addEventListener("click", async () => {
-    const selectedRentalCategory: string = getRadioValue({ radios: rentalCategoryRadios, defaultValue: "general-rental" });
-    const selectedSmoking: string = getRadioValue({ radios: nonSmokingRadios, defaultValue: "none-specification" });
-    const selectedDepartureDatetime: Date = new Date(departureDatetimeInput.value);
-    const selectedReturnDatetime: Date = new Date(returnDatetimeInput.value);
+nonSmokingRadios.forEach((nonSmokingRadio: HTMLInputElement) => {
+    nonSmokingRadio.addEventListener("change", async () => {
+        await setRentalClassSelectValue();
+        await setCarModelSelectValue();
+        await setLicensePlateSelectValue();
+    }, false);
+});
 
-    const reservationData: ReservationData = {
-        vehicleId: licensePlateSelect.value,
-        reservationName: reservationName.value,
-        rentalCategory: selectedRentalCategory,
-        departureStore: departureStoreSelect.value,
-        returnStore: returnStoreSelect.value,
-        departureDatetime: selectedDepartureDatetime,
-        returnDatetime: selectedReturnDatetime,
-        nonSmoking: selectedSmoking,
-        comment: commentTextarea.value
-    }
-
-    console.log(reservationData);
-
-    try {
-        // await window.sqlInsert.reservationData(reservationData);
-    } catch (error: unknown) {
-        console.error(`Failed to invoke reservationData: ${error}`);
-    }
+rentalClassSelect.addEventListener("change", async () => {
+    await setCarModelSelectValue();
+    await setLicensePlateSelectValue();
 }, false);
 
-
-
+carModelSelect.addEventListener("change", async () => {
+    await setLicensePlateSelectValue();
+}, false);

@@ -83,11 +83,25 @@ contextBridge.exposeInMainWorld(
 );
 
 contextBridge.exposeInMainWorld(
+    "sqlUpdate",
+    {
+        reservationData: async (reservationData: ReservationData): Promise<void> => {
+            ipcRenderer.send("sqlUpdate:reservationData", reservationData);
+        }
+    }
+);
+
+contextBridge.exposeInMainWorld(
     "contextMenu",
     {
         scheduleBar: async (args: { reservationId: string }) => {
             ipcRenderer.send("contextMenu:schedule-bar", args);
         },
-        getReservationId: (callback: (reservationId: string) => void) => ipcRenderer.on("contextMenu:getReservationId", (event: Electron.IpcRendererEvent, reservationId: string) => callback(reservationId))
+        getReservationId: (callback: (reservationId: string) => void) => ipcRenderer.on("contextMenu:getReservationId", (event: Electron.IpcRendererEvent, reservationId: string) => callback(reservationId)),
+        getEditedReservationData: (callback: (reservationData: ReservationData) => void) => {
+            ipcRenderer.on("update-data", (event: Electron.IpcRendererEvent, reservationData: ReservationData) => {
+                return callback(reservationData);
+            });
+        }
     }
 );

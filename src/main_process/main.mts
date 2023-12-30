@@ -6,6 +6,9 @@ import { VehicleAttributes, CarCatalog, ReservationData } from "/Users/takehirom
 import dotenv from "dotenv";
 dotenv.config();
 
+// eslint-disable-next-line @typescript-eslint/no-var-requires
+const WebSocket = require("ws");
+
 // Handle creating/removing shortcuts on Windows when installing/uninstalling.
 if (require('electron-squirrel-startup')) {
     app.quit();
@@ -16,6 +19,8 @@ const port: string = process.env.PORT as string;
 const imageDirectory: string = process.env.IMAGE_DIRECTORY as string;
 
 app.on("ready", WindowHandler.createMainWindow);
+
+const socket = new WebSocket(`ws://${serverHost}:${port}`);
 
 // app.on("window-all-closed", () => {
 //     if (process.platform !== "darwin") {
@@ -209,6 +214,38 @@ ipcMain.handle("sqlInsert:reservationData", async (event: Electron.IpcMainInvoke
     }
 });
 
+ipcMain.on("sqlUpdate:reservationData", async (event: Electron.IpcMainInvokeEvent, data: ReservationData) => {
+    const serverEndPoint = `http://${serverHost}:${port}/sqlUpdate/reservationData`;
+
+    const postData: FormData = new FormData();
+    postData.append("data", JSON.stringify(data));
+
+    try {
+        const response: AxiosResponse = await axios.post(serverEndPoint, postData, {
+            headers: {
+                ...postData.getHeaders()
+            }
+        });
+
+        return response.status;
+    } catch (error: unknown) {
+        return `Failed to update reservation data ${error}`;
+    }
+});
+
 ipcMain.on("contextMenu:schedule-bar", () => {
     return;
+});
+
+socket.addEventListener("open", () => {
+    console.log("WebSocket connection established");
+});
+
+socket.addEventListener("message", async () => {
+    // const jsonData = event.data;
+    await WindowHandler.windows.displayReservationWindow.send("update-data");
+});
+
+socket.addEventListener("close", () => {
+    console.log("WebSocket connection closed");
 });

@@ -113,33 +113,6 @@ const handleVehicleAttributesItemScroll = (): void => {
         nextMonthCalendar.initialize()
     ]);
 
-    const modalBackgroundDiv: HTMLDivElement = MonthCalendar.backgroundDiv();
-    ScheduleBar.scheduleBars.forEach((scheduleBar: ScheduleBarInfo) => {
-        scheduleBar.divElement.addEventListener("click", (event: MouseEvent) => {
-            while (modalBackgroundDiv.firstChild) {
-                modalBackgroundDiv.removeChild(modalBackgroundDiv.firstChild);
-            }
-
-            const reservationData: ReservationData = scheduleBar.reservationData;
-            const reservationInfoModal: HTMLDivElement = MonthCalendar.reservationInfoModal({ reservationData: reservationData, mouseEvent: event });
-            modalBackgroundDiv.append(reservationInfoModal);
-            body.append(modalBackgroundDiv);
-        }, false);
-    });
-
-    ScheduleBar.scheduleBars.forEach((scheduleBar: ScheduleBarInfo) => {
-        const reservationId: string = scheduleBar.reservationData.id;
-        scheduleBar.divElement.addEventListener("contextmenu", async (event: MouseEvent) => {
-            await window.contextMenu.scheduleBar({ reservationId: reservationId });
-        }, false);
-    });
-
-    window.addEventListener("click", (event: MouseEvent) => {
-        if (event.target === modalBackgroundDiv) {
-            modalBackgroundDiv.remove();
-        }
-    }, false);
-
     const totalCalendarWidth: number = getTotalCalendarWidth();
 
     const dayWidth: number = totalCalendarWidth / totalDays;
@@ -168,4 +141,11 @@ const handleVehicleAttributesItemScroll = (): void => {
     vehicleScheduleContainer.addEventListener("scroll", handleVehicleAttributesItemScroll);
     calendarContainer.addEventListener("scroll", handleVehicleScheduleScrollX);
     vehicleScheduleContainer.addEventListener("scroll", handleCalendarScroll);
+
+    window.contextMenu.getEditedReservationData((reservationData: ReservationData) => {
+        previousMonthCalendar.updateScheduleBars();
+        currentMonthCalendar.updateScheduleBars();
+        nextMonthCalendar.updateScheduleBars();
+    });
 })();
+

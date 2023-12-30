@@ -1,9 +1,12 @@
+import { MouseInputEvent } from "electron";
 import { ReservationData, ScheduleBarInfo } from "/Users/takehiromizuno/Documents/drive-me-20231202/drive-me/src/@types/types.d";
+import { getMonthName } from "/Users/takehiromizuno/Documents/drive-me-20231202/drive-me/src/renderer_process/common_modules.mjs";
 
 const ScheduleBar = class {
     static scheduleBars: ScheduleBarInfo[] = [];
     reservationData: ReservationData;
     scheduleBar: HTMLDivElement;
+    modalBackground: HTMLDivElement;
 
     constructor(args: {
         reservationData: ReservationData,
@@ -15,6 +18,8 @@ const ScheduleBar = class {
         const { reservationData, startMs, totalMsOfSchedule, previousScheduleBarWidth, color } = args;
 
         this.reservationData = reservationData;
+
+        const body: HTMLBodyElement = document.querySelector("body");
 
         const departureDatetime: Date = new Date(reservationData.departureDatetime);
         const returnDatetime: Date = new Date(reservationData.returnDatetime);
@@ -41,16 +46,51 @@ const ScheduleBar = class {
         const departureReturnInfoDiv: HTMLDivElement = this.departureReturnInfoDiv();
         const reservationNameDiv: HTMLDivElement = this.reservationNameDiv();
 
+        scheduleBar.append(departureReturnInfoDiv, reservationNameDiv);
+
+        scheduleBar.addEventListener("click", (event: MouseEvent) => {
+            const modalBackgroundDiv: HTMLDivElement = this.modalBackgroundDiv();
+            const reservationInfoModal: HTMLDivElement = this.reservationInfoModalDiv(event);
+
+            modalBackgroundDiv.append(reservationInfoModal);
+            body.append(modalBackgroundDiv);
+
+            this.modalBackground = modalBackgroundDiv;
+        }, false);
+
+        window.addEventListener("click", (event: MouseEvent) => {
+            if (event.target === this.modalBackground) {
+                this.modalBackground.remove();
+            }
+        }, false);
+
+        scheduleBar.addEventListener("contextmenu", async () => {
+            await window.contextMenu.scheduleBar({ reservationId: reservationData.id });
+        }, false);
+
         const scheduleBarInfo = {
             divElement: scheduleBar,
-            reservationData: reservationData
+            reservationData: reservationData,
+            instance: this
         }
 
         ScheduleBar.scheduleBars.push(scheduleBarInfo);
 
-        scheduleBar.append(departureReturnInfoDiv, reservationNameDiv);
-
         this.scheduleBar = scheduleBar;
+    }
+
+    private modalBackgroundDiv = (): HTMLDivElement => {
+        const backgroundDiv: HTMLDivElement = document.createElement("div");
+        Object.assign(backgroundDiv.style, {
+            display: "block",
+            width: "100%",
+            height: "100%",
+            left: "0",
+            top: "0",
+            position: "fixed",
+            zIndex: "1"
+        })
+        return backgroundDiv;
     }
 
     private departureReturnInfoDiv = () => {
@@ -128,6 +168,146 @@ const ScheduleBar = class {
         });
         reservationNameDiv.textContent = reservationName;
         return reservationNameDiv;
+    }
+
+    reservationInfoModalDiv = (mouseEvent: MouseEvent): HTMLDivElement => {
+        const ReservationInfoModal = (): HTMLDivElement => {
+            const reservationInfoModal: HTMLDivElement = document.createElement("div");
+            Object.assign(reservationInfoModal.style, {
+                display: "grid",
+                zIndex: "2",
+                backgroundColor: "green",
+                position: "absolute",
+                left: `${mouseEvent.x}px`,
+                top: `${mouseEvent.y}px`,
+                border: "solid"
+            });
+            reservationInfoModal.className = "card"
+            return reservationInfoModal;
+        }
+
+        const ReservationNameDiv = (): HTMLDivElement => {
+            const reservationNameDiv: HTMLDivElement = document.createElement("div");
+            Object.assign(reservationNameDiv.style, {
+                display: "flex"
+            });
+            reservationNameDiv.textContent = `${this.reservationData.reservationName} 様`;
+            return reservationNameDiv;
+        }
+
+        const DepartureDatetimeDiv = (): HTMLDivElement => {
+            const departureDatetimeDiv: HTMLDivElement = document.createElement("div");
+            Object.assign(departureDatetimeDiv.style, {
+                display: "flex"
+            });
+
+            const departureDatetime: Date = new Date(this.reservationData.departureDatetime);
+            const departureMonthIndex: number = departureDatetime.getMonth();
+
+            const departureYear: number = departureDatetime.getFullYear();
+            const departureMonth: string = getMonthName({ monthIndex: departureMonthIndex });
+            const departureDate: string = String(departureDatetime.getDate()).padStart(2, "0");
+            const departureHours: number = departureDatetime.getHours();
+            const departureMinutes: string = String(departureDatetime.getMinutes()).padStart(2, "0");
+
+            departureDatetimeDiv.textContent = `出発時刻: ${departureYear}年${departureMonth}${departureDate}日 ${departureHours}:${departureMinutes}`;
+            return departureDatetimeDiv;
+        }
+
+        const ReturnDatetimeDiv = (): HTMLDivElement => {
+            const returnDatetimeDiv: HTMLDivElement = document.createElement("div");
+            Object.assign(returnDatetimeDiv.style, {
+                display: "flex"
+            });
+
+            const returnDatetime: Date = new Date(this.reservationData.returnDatetime);
+            const returnMonthIndex: number = returnDatetime.getMonth();
+
+            const returnYear: number = returnDatetime.getFullYear();
+            const returnMonth: string = getMonthName({ monthIndex: returnMonthIndex });
+            const returnDate: string = String(returnDatetime.getDate()).padStart(2, "0");
+            const returnHours: number = returnDatetime.getHours();
+            const returnMinutes: string = String(returnDatetime.getMinutes()).padStart(2, "0");
+
+            returnDatetimeDiv.textContent = `返却時刻: ${returnYear}年${returnMonth}${returnDate}日 ${returnHours}:${returnMinutes}`;
+            return returnDatetimeDiv;
+        }
+
+        const DepartureStoreDiv = (): HTMLDivElement => {
+            const departureStoreDiv: HTMLDivElement = document.createElement("div");
+            Object.assign(departureStoreDiv.style, {
+                display: "flex"
+            });
+            departureStoreDiv.textContent = this.reservationData.departureStore;
+            return departureStoreDiv;
+        }
+
+        const ReturnStoreDiv = (): HTMLDivElement => {
+            const returnStoreDiv: HTMLDivElement = document.createElement("div");
+            Object.assign(returnStoreDiv.style, {
+                display: "flex"
+            });
+            returnStoreDiv.textContent = this.reservationData.returnStore;
+            return returnStoreDiv;
+        }
+
+        const RentalCategoryDiv = (): HTMLDivElement => {
+            const rentalCategoryDiv: HTMLDivElement = document.createElement("div");
+            Object.assign(rentalCategoryDiv.style, {
+                display: "flex"
+            });
+            switch (this.reservationData.rentalCategory) {
+                case "general-rental":
+                    rentalCategoryDiv.textContent = "貸出区分: 一般貸出"
+                    break;
+                case "loaner-rental":
+                    rentalCategoryDiv.textContent = "貸出区分: 損保代車"
+                    break;
+                case "booking":
+                    rentalCategoryDiv.textContent = "貸出区分: 仮押さえ"
+            }
+            return rentalCategoryDiv;
+        }
+
+        const NonSmokingDiv = (): HTMLDivElement => {
+            const nonSmokingDiv: HTMLDivElement = document.createElement("div");
+            Object.assign(nonSmokingDiv.style, {
+                display: "flex"
+            });
+            switch (this.reservationData.nonSmoking) {
+                case "non-smoking":
+                    nonSmokingDiv.textContent = "禁煙希望"
+                    break;
+                case "ok-smoking":
+                    nonSmokingDiv.textContent = "喫煙希望"
+                    break;
+                case "none-specification":
+                    nonSmokingDiv.textContent = "指定なし"
+                    break;
+            }
+            return nonSmokingDiv;
+        }
+
+        const reservationInfoModal: HTMLDivElement = ReservationInfoModal();
+        const reservationNameDiv: HTMLDivElement = ReservationNameDiv();
+        const departureStoreDiv: HTMLDivElement = DepartureStoreDiv();
+        const departureDatetimeDiv: HTMLDivElement = DepartureDatetimeDiv();
+        const returnStoreDiv: HTMLDivElement = ReturnStoreDiv();
+        const returnDatetimeDiv: HTMLDivElement = ReturnDatetimeDiv();
+        const rentalCategoryDiv: HTMLDivElement = RentalCategoryDiv();
+        const nonSmokingDiv: HTMLDivElement = NonSmokingDiv();
+
+        reservationInfoModal.append(
+            reservationNameDiv,
+            departureStoreDiv,
+            departureDatetimeDiv,
+            returnStoreDiv,
+            returnDatetimeDiv,
+            rentalCategoryDiv,
+            nonSmokingDiv
+        );
+
+        return reservationInfoModal;
     }
 
     getReservationData() {
