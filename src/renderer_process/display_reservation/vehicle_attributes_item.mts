@@ -15,7 +15,9 @@ const VehicleAttributesItem = class extends HTMLDivElement {
             border: "solid",
             width: "300px",
             height: "130px",
-            lineHight: "200%"
+            lineHight: "200%",
+            cursor: "nomal",
+            userSelect: "none",
         });
 
         (async () => {
@@ -29,6 +31,10 @@ const VehicleAttributesItem = class extends HTMLDivElement {
             const textDiv: HTMLDivElement = this.textDiv({ vehicleAttributes });
             this.append(textDiv);
         })();
+
+        this.addEventListener("contextmenu", async () => {
+            await window.contextMenu.vehicleAttributesItem({ vehicleId: vehicleAttributes.id });
+        }, false);
     }
 
     private imageDiv = async (fileName?: string): Promise<HTMLDivElement> => {
@@ -52,8 +58,12 @@ const VehicleAttributesItem = class extends HTMLDivElement {
         Object.assign(imgElement.style, {
             objectFit: "contain",
             width: "130px",
-            height: "130px"
+            height: "130px",
         });
+
+        imgElement.addEventListener("dragstart", (event: MouseEvent) => {
+            event.preventDefault();
+        }, false);
 
         imageDiv.append(imgElement);
 

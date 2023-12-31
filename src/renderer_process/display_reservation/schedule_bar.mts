@@ -40,6 +40,8 @@ const ScheduleBar = class {
             backgroundColor: color,
             whiteSpace: "nowrap",
             overflow: "scroll",
+            cursor: "default",
+            userSelect: "none"
         });
         scheduleBar.className = "card";
 

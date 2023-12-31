@@ -1,10 +1,8 @@
 import { VehicleAttributesItem } from "/Users/takehiromizuno/Documents/drive-me-20231202/drive-me/src/renderer_process/display_reservation/vehicle_attributes_item.mjs";
 import { MonthCalendar } from "/Users/takehiromizuno/Documents/drive-me-20231202/drive-me/src/renderer_process/display_reservation/month_calendar.mjs";
-import { VehicleAttributes, CalendarInfo, ScheduleBarInfo, ReservationData } from "/Users/takehiromizuno/Documents/drive-me-20231202/drive-me/src/@types/types.d";
+import { VehicleAttributes, CalendarInfo } from "/Users/takehiromizuno/Documents/drive-me-20231202/drive-me/src/@types/types.d";
 import { getMonthName } from "/Users/takehiromizuno/Documents/drive-me-20231202/drive-me/src/renderer_process/common_modules.mjs";
-import { ScheduleBar } from "/Users/takehiromizuno/Documents/drive-me-20231202/drive-me/src/renderer_process/display_reservation/schedule_bar.mjs";
 
-const body: HTMLBodyElement = document.querySelector("body");
 const headerDiv: HTMLDivElement = document.querySelector("#header-div") as HTMLDivElement;
 const vehicleAttributesItemContainer: HTMLDivElement = document.querySelector("#vehicle-attributes-item-container-div") as HTMLDivElement;
 const calendarContainer: HTMLDivElement = document.querySelector("#calendar-container-div") as HTMLDivElement;
@@ -142,7 +140,7 @@ const handleVehicleAttributesItemScroll = (): void => {
     calendarContainer.addEventListener("scroll", handleVehicleScheduleScrollX);
     vehicleScheduleContainer.addEventListener("scroll", handleCalendarScroll);
 
-    window.contextMenu.getEditedReservationData((reservationData: ReservationData) => {
+    window.contextMenu.updateReservationData(() => {
         previousMonthCalendar.updateScheduleBars();
         currentMonthCalendar.updateScheduleBars();
         nextMonthCalendar.updateScheduleBars();

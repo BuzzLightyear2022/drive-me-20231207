@@ -2,8 +2,7 @@ import dotenv from "dotenv";
 dotenv.config();
 import { BrowserWindow, ipcMain, Menu } from "electron";
 import path from "path";
-import axios, { AxiosResponse } from "axios";
-import { Windows, ReservationData } from "/Users/takehiromizuno/Documents/drive-me-20231202/drive-me/src/@types/types.d";
+import { Windows } from "/Users/takehiromizuno/Documents/drive-me-20231202/drive-me/src/@types/types.d";
 
 class WindowHandler {
     static preloadScript: string = path.join(__dirname, "preload.js");
@@ -12,7 +11,8 @@ class WindowHandler {
         insertVehicleAttributesWindow: undefined,
         insertReservationWindow: undefined,
         displayReservationWindow: undefined,
-        editReservationWindow: undefined
+        editReservationWindow: undefined,
+        editVehicleAttributesWindow: undefined
     };
 
     static createMainWindow = () => {
@@ -100,6 +100,7 @@ class WindowHandler {
             },
         });
 
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
         ipcMain.on("contextMenu:schedule-bar", (event: Electron.IpcMainEvent, args: { reservationId: string }) => {
             const { reservationId } = args;
 
@@ -120,6 +121,21 @@ class WindowHandler {
             contextMenu.popup(WindowHandler.windows.displayReservationWindow);
         });
 
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        ipcMain.on("contextMenu:vehicleAttributesItem", (event: Electron.IpcMainEvent, args: { vehicleId: string }) => {
+            const { vehicleId } = args;
+
+            const contextMenu = Menu.buildFromTemplate([
+                {
+                    label: "車両情報更新",
+                    click: async () => {
+                        WindowHandler.createEditVehicleAttributesWindow(vehicleId);
+                    }
+                }
+            ]);
+            contextMenu.popup(WindowHandler.windows.displayReservationWindow);
+        });
+
         if (MAIN_WINDOW_VITE_DEV_SERVER_URL) {
             win.loadURL(`${MAIN_WINDOW_VITE_DEV_SERVER_URL}/display_reservation.html`);
             WindowHandler.windows.displayReservationWindow = win;
@@ -127,6 +143,28 @@ class WindowHandler {
             win.loadFile(path.join(__dirname, `../renderer/${MAIN_WINDOW_VITE_NAME}/display_reservation.html`));
             WindowHandler.windows.displayReservationWindow = win;
         }
+
+        win.maximize();
+    }
+
+    static createEditVehicleAttributesWindow = (vehicleId: string): void => {
+        const win: BrowserWindow = new BrowserWindow({
+            webPreferences: {
+                preload: WindowHandler.preloadScript
+            },
+        });
+
+        if (MAIN_WINDOW_VITE_DEV_SERVER_URL) {
+            win.loadURL(`${MAIN_WINDOW_VITE_DEV_SERVER_URL}/edit_vehicleAttributes.html`);
+            WindowHandler.windows.editVehicleAttributesWindow = win;
+        } else {
+            win.loadFile(path.join(__dirname, `../renderer/${MAIN_WINDOW_VITE_NAME}/edit_vehicleAttributes.html`));
+            WindowHandler.windows.editVehicleAttributesWindow = win;
+        }
+
+        WindowHandler.windows.editVehicleAttributesWindow.webContents.on("dom-ready", () => {
+            WindowHandler.windows.editVehicleAttributesWindow.webContents.send("contextMenu:getVehicleId", vehicleId);
+        });
 
         win.maximize();
     }

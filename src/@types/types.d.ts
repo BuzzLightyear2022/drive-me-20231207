@@ -86,5 +86,6 @@ export type Windows = {
     insertVehicleAttributesWindow: BrowserWindow,
     insertReservationWindow: BrowserWindow,
     displayReservationWindow: BrowserWindow,
-    editReservationWindow: BrowserWindow
+    editReservationWindow: BrowserWindow,
+    editVehicleAttributesWindow: BrowserWindow
 }

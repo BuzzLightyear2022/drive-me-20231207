@@ -1,5 +1,4 @@
 import { CarCatalog, LicensePlatesData, ReservationData, Navigations, VehicleAttributes, VehicleAttributesArray } from "../types";
-import { ipcRenderer } from "electron";
 
 export interface serverInfo {
     serverHost: () => Promise<string>;
@@ -39,8 +38,14 @@ export interface sqlUpdate {
 
 export interface contextMenu {
     scheduleBar: (args: { reservationId: string }) => Promise<void>;
+    vehicleAttributesItem: (args: { vehicleId: string }) => Promise<void>;
     getReservationId: (callback) => void;
-    getEditedReservationData: (callback: (reservationData: ReservationData) => void) => void;
+    getVehicleId: (callback) => void;
+    updateReservationData: (callback: (reservationData: ReservationData) => void) => void;
+}
+
+export interface dialog {
+    openFile: () => Promise<string>;
 }
 
 declare global {
@@ -52,5 +57,6 @@ declare global {
         sqlInsert: sqlInsert;
         sqlUpdate: sqlUpdate
         contextMenu: contextMenu;
+        dialog: dialog;
     }
 }

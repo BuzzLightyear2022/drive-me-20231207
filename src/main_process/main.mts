@@ -1,6 +1,8 @@
-import { app, ipcMain, Menu, ipcRenderer } from "electron";
+import { app, ipcMain, dialog } from "electron";
 import FormData from "form-data";
 import axios, { AxiosResponse } from "axios";
+import fs from "fs";
+import path from "path";
 import { WindowHandler } from "/Users/takehiromizuno/Documents/drive-me-20231202/drive-me/src/main_process/window_handler.mjs";
 import { VehicleAttributes, CarCatalog, ReservationData } from "/Users/takehiromizuno/Documents/drive-me-20231202/drive-me/src/@types/types.d";
 import dotenv from "dotenv";
@@ -233,8 +235,29 @@ ipcMain.on("sqlUpdate:reservationData", async (event: Electron.IpcMainInvokeEven
     }
 });
 
-ipcMain.on("contextMenu:schedule-bar", () => {
-    return;
+ipcMain.handle("dialog:openFile", async () => {
+    const result = await dialog.showOpenDialog({
+        properties: ["openFile"],
+        filters: [
+            {
+                name: "Images",
+                extensions: ["jpg", "jpeg", "png", "gif"]
+            }
+        ]
+    });
+
+    if (!result.canceled && result.filePaths.length > 0) {
+        const selectedFilePath = result.filePaths[0];
+        const fileExtension = path.extname(selectedFilePath);
+
+        try {
+            const fileData = fs.readFileSync(selectedFilePath, { encoding: "base64" });
+            const imageDataUrl = `data:image/${fileExtension};base64,${fileData}`;
+            return imageDataUrl;
+        } catch (error: unknown) {
+            console.error(error);
+        }
+    }
 });
 
 socket.addEventListener("open", () => {
@@ -242,8 +265,7 @@ socket.addEventListener("open", () => {
 });
 
 socket.addEventListener("message", async () => {
-    // const jsonData = event.data;
-    await WindowHandler.windows.displayReservationWindow.send("update-data");
+    await WindowHandler.windows.displayReservationWindow.send("sqlUpdate:reservationData");
 });
 
 socket.addEventListener("close", () => {

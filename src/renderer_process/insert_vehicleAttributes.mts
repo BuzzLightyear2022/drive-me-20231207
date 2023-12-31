@@ -155,7 +155,7 @@ replaceFullWidthNumToHalfWidthNum({ element: licensePlateNumberInput, limitDigit
 })();
 
 submitButton.addEventListener("click", async (): Promise<void> => {
-    const imageUrl: string = await getImageUrl() as string;
+    const imageUrl: string | null = await getImageUrl();
     const vehicleAttributes: VehicleAttributes = {
         imageFileName: imageUrl,
         carModel: carModelSelect.value,

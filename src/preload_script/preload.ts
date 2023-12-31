@@ -46,7 +46,7 @@ contextBridge.exposeInMainWorld(
 contextBridge.exposeInMainWorld(
     "sqlSelect",
     {
-        vehicleAttributes: async (): Promise<VehicleAttributes> => {
+        vehicleAttributes: async (): Promise<VehicleAttributes[]> => {
             return await ipcRenderer.invoke("sqlSelect:vehicleAttributes")
         },
         rentalClasses: async (args: { selectedSmoking: string }): Promise<string[]> => {
@@ -97,11 +97,22 @@ contextBridge.exposeInMainWorld(
         scheduleBar: async (args: { reservationId: string }) => {
             ipcRenderer.send("contextMenu:schedule-bar", args);
         },
+        vehicleAttributesItem: async (args: { vehicleId: string }) => {
+            ipcRenderer.send("contextMenu:vehicleAttributesItem", args);
+        },
         getReservationId: (callback: (reservationId: string) => void) => ipcRenderer.on("contextMenu:getReservationId", (event: Electron.IpcRendererEvent, reservationId: string) => callback(reservationId)),
-        getEditedReservationData: (callback: (reservationData: ReservationData) => void) => {
-            ipcRenderer.on("update-data", (event: Electron.IpcRendererEvent, reservationData: ReservationData) => {
-                return callback(reservationData);
+        getVehicleId: (callback: (vehicleId: string) => void) => ipcRenderer.on("contextMenu:getVehicleId", (event: Electron.IpcRendererEvent, vehicleId) => callback(vehicleId)),
+        updateReservationData: (callback: () => void) => {
+            ipcRenderer.on("sqlUpdate:reservationData", () => {
+                return callback();
             });
         }
+    }
+);
+
+contextBridge.exposeInMainWorld(
+    "dialog",
+    {
+        openFile: async () => ipcRenderer.invoke("dialog:openFile")
     }
 );
