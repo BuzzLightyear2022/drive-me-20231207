@@ -12,20 +12,5 @@
     "plugin:import/electron",
     "plugin:import/typescript"
   ],
-  "parser": "@typescript-eslint/parser",
-  "settings": {
-    "import/resolver": {
-      "node": {
-        "extentions": [
-          ".js",
-          ".jsx",
-          ".ts",
-          ".tsx",
-          ".mjs",
-          ".mts"
-        ]
-      },
-      "typescript": {}
-    }
-  }
+  "parser": "@typescript-eslint/parser"
 }

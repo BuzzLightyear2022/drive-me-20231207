@@ -4,7 +4,6 @@ import NoImagePng from "/Users/takehiromizuno/Documents/drive-me-20231202/drive-
 import squareAndArrowUpCircleFill from "/Users/takehiromizuno/Documents/drive-me-20231202/drive-me/src/public/assets/square.and.arrow.up.circle.fill@2x.png";
 
 const submitButton: HTMLButtonElement = document.querySelector("#submit-button") as HTMLButtonElement;
-const imageInput: HTMLInputElement = document.querySelector("#image-input") as HTMLInputElement;
 const imagePreview: HTMLImageElement = document.querySelector("#image-preview") as HTMLImageElement;
 const rentalClassSelect: HTMLSelectElement = document.querySelector("#rental-class") as HTMLSelectElement;
 const carModelSelect: HTMLSelectElement = document.querySelector("#car-model") as HTMLSelectElement;
@@ -25,23 +24,6 @@ const hasTelevisionCheck: HTMLInputElement = document.querySelector("#has-televi
 const hasExternalInputCheck: HTMLInputElement = document.querySelector("#has-external-input") as HTMLInputElement;
 const hasSpareKeyCheck: HTMLInputElement = document.querySelector("#has-spare-key") as HTMLInputElement;
 const otherFeaturesInput: HTMLInputElement = document.querySelector("#other-features") as HTMLInputElement;
-
-const getImageUrl = async (): Promise<string | null> => {
-    const imageFiles: FileList | null = imageInput.files;
-    if (imageFiles && imageFiles.length > 0) {
-        const imageUrlPromise = new Promise<string | null>((resolve: (value: string | PromiseLike<string | null> | null) => void): void => {
-            const reader: FileReader = new FileReader();
-            reader.addEventListener("load", (): void => {
-                const imageUrl: string = reader.result as string;
-                resolve(imageUrl);
-            }, false);
-            reader.readAsDataURL(imageFiles[0]);
-        });
-        return imageUrlPromise;
-    } else {
-        return null;
-    }
-}
 
 const replaceFullWidthNumToHalfWidthNum = (args: { element: HTMLInputElement, limitDigits?: number }): void => {
     const { element, limitDigits = undefined } = args;
@@ -201,11 +183,11 @@ Object.assign(overlayElement.style, {
     zIndex: "1"
 });
 
-imagePreview.parentElement.addEventListener("mouseenter", (event: MouseEvent) => {
+imagePreview.parentElement.addEventListener("mouseenter", () => {
     imagePreview.parentElement.append(overlayElement);
 }, false);
 
-imagePreview.parentElement.addEventListener("mouseleave", (event: MouseEvent) => {
+imagePreview.parentElement.addEventListener("mouseleave", () => {
     overlayElement.remove();
 }, false);
 
@@ -217,7 +199,7 @@ overlayElement.addEventListener("mouseleave", (event: MouseEvent) => {
     event.stopPropagation();
 }, false);
 
-imagePreview.parentElement.addEventListener("click", async (event: MouseEvent) => {
+imagePreview.parentElement.addEventListener("click", async () => {
     try {
         const imageUrl = await window.dialog.openFile();
         if (imageUrl) {
